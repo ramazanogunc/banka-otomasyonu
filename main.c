@@ -267,10 +267,10 @@ int main()
                             TumunuListele();
                             printf("\nPara Gondereceginiz Hesap numarasini giriniz:");
 	                        scanf("%d",&temp);
-
+	                        int *p;
                             while(1)
                             {
-                                int *p;
+
                                 p=HavaleHesapIndisBul(temp);
                                 if(*p == -1)
                                 {
@@ -280,6 +280,8 @@ int main()
                                 }
                                 else break;
                             }
+                            temp2=(*p);
+                            temp3=(*(p+1));
                             fflush(stdin);
 						    printf("Havale tarhini giriniz(01012000 - formatinda giriniz): ");
     					    //scanf("%d",&rapor.tarih);
@@ -309,7 +311,7 @@ int main()
 
                             printf("Gondereceginiz miktari giriniz");
 						    scanf("%f",&para);
-
+                            Havale(mSirasi, hSirasi, temp2, temp3, para);
                             //havale tarihi
                             //havale tutar�
                             //havale
@@ -564,27 +566,28 @@ void TumunuListele()
 
 int *HavaleHesapIndisBul(int hesapNo)
 {
-    int indisler[2];
+    int indisler[2],p;
+    p=indisler;
     int gecici=-1;
     for (i = 0; i < musteriSayisi; i++)
     {
-        for( j = 0;j < musteriler[i].hesapSayisi ; j++)
+        for( j = 0; j < musteriler[i].hesapSayisi ; j++)
         {
             if ( musteriler[i].hesap[j].numarasi == hesapNo)
             {
                 indisler[0]=i;
                 indisler[1]=j;
-                return indisler;
+                return p;
             }
-
         }
     }
-    return &gecici;
+    p=&gecici;
+    return p;
 
 }
 void Havale(int mSirasi, int hSirasi, int gmSirasi, int ghSirasi, float para)
 {
-    if( musteriler[mSirasi].hesap[hSirasi].bakiye <= para )
+    if( musteriler[mSirasi].hesap[hSirasi].bakiye >= para )
     {
         musteriler[mSirasi].hesap[hSirasi].bakiye-=para;
         musteriler[gmSirasi].hesap[ghSirasi].bakiye+=para;
