@@ -4,11 +4,11 @@
 
 void ProgramAcilis();
 void MusteriEkle();
-void MusteriListele();
+int MusteriListele();
 int MusteriIndisBul(int musteriNo);
 void MusteriSil(int mSirasi);
 void HesapAc(int mSirasi);
-void HesapListele(int mSirasi);
+int HesapListele(int mSirasi);
 int HesapIndisBul(int mSirasi, int hesapNo);
 void HesapSil(int mSirasi, int hSirasi);
 void ParaYatir(int mSirasi, int hSirasi,float para);
@@ -50,11 +50,11 @@ typedef struct
 }Rapor;
 
 Rapor rapor;
-Musteri musteriler[1000],okunan;
+Musteri musteriler[1000], *mp = musteriler;
 FILE *fp, *fp2;
 
 float para;
-char sayiKontrol, tarih[8], tarih2[8];
+char sayiKontrol, tarih[8], tarih2[8] ,*tp1 = tarih, *tp2 = tarih2;
 int i, j, secim, mSirasi, hSirasi, temp, temp2, temp3, musteriSayisi=0, raporSayisi=0;
 int main()
 {
@@ -76,7 +76,7 @@ int main()
             MusteriEkle();
             break;
         case 2:
-            MusteriListele();
+            if(MusteriListele() == 0) break;
             printf("!!!ONEMLI UYARI!!!\nMusteriyi sildiginizde Tum Hesaplari ve Bakiyeleri de silinir.\n");
             printf("Silinecek musteri numaranizi giriniz:");
             scanf("%d",&temp);
@@ -96,7 +96,7 @@ int main()
         case 3:
             system("CLS");
             printf("------------------------MUSTERI SEC------------------------\n");
-            MusteriListele();
+            if(MusteriListele() == 0) break;
             printf("Musteri numaranizi giriniz:");
             scanf("%d",&temp);
             while(1)
@@ -119,8 +119,10 @@ int main()
                 printf("3-Hesap Sec\n\n");
                 printf("9-Ust Menu\n");
                 printf("0-Cikis\n");
-                printf("Sayin %s Hos Geldiniz. Islem Yapilan Musteri Numaraniz %d\n"
-                , musteriler[mSirasi].adi, musteriler[mSirasi].numarasi);//
+                printf("\n------------------------------------------------------------\n");
+                printf("Sayin %s Hos Geldiniz. \nIslem Yapilan Musteri Numaraniz %d"
+                , (mp+mSirasi)->adi, (mp+mSirasi)->numarasi);
+                printf("\n------------------------------------------------------------\n");
 
                while(1)
                {
@@ -151,7 +153,7 @@ int main()
                     break;
                 case 2:
                     printf("\n------------------------HESAP SILME------------------------\n");
-                    HesapListele(mSirasi);
+                    if(HesapListele(mSirasi) == 0) break;
                     printf("!!!ONEMLI UYARI!!!\nHesabi sildiginizde Bakiyesi de silinir.\n");
                     printf("Silinecek HESAP numaranizi giriniz:");
                     scanf("%d",&temp);
@@ -173,7 +175,7 @@ int main()
                 case 3:
                     system("CLS");
                     printf("------------------------HESAP SEC------------------------\n");
-                    HesapListele(mSirasi);
+                    if(HesapListele(mSirasi) == 0) break;
                     printf("Hesap numaranizi giriniz:");
                     scanf("%d",&temp);
                     while(1)
@@ -191,13 +193,15 @@ int main()
                     {
                         printf("\n-------------------HESAP ILSEM MENU-------------------\n");
                         printf("1-Para Cek\n");
-                        printf("2-Para Yatir.\n");
+                        printf("2-Para Yatir\n");
                         printf("3-Havale\n");
                         printf("4-Hesap Raporu Al\n\n");
                         printf("9-Ust Menu\n");
                         printf("0-Cikis\n");
-                        printf("Sayin %s Hos Geldiniz. Islem Yapilan Hesap Numaraniz %d\n"
-                        ,musteriler[mSirasi].adi, musteriler[mSirasi].hesap[hSirasi].numarasi);//
+                        printf("\n------------------------------------------------------------\n");
+                        printf("Sayin %s Hos Geldiniz. \nIslem Yapilan Hesap Numaraniz %d \nHesap Bakiyeniz %.2f"
+                        ,(mp+mSirasi)->adi, (mp+mSirasi)->hesap[hSirasi].numarasi , (mp+mSirasi)->hesap[hSirasi].bakiye);
+                        printf("\n------------------------------------------------------------\n");
 
                         while(1)
                         {
@@ -232,7 +236,7 @@ int main()
 						    {
 							    for(i=0; i<8 ;i++)
 							    {
-								    if(tarih[i] < 48 || tarih[i] > 57)
+								    if(*(tp1 + i) < 48 || *(tp1 + i) > 57)
 								    {
 									    break;
 								    }
@@ -255,9 +259,9 @@ int main()
                             {
                             printf("Cekeceginiz miktari giriniz : ");
 						    scanf("%f",&para);
-                                if ( musteriler[mSirasi].tipi == bireysel)    
+                                if ( (mp+mSirasi)->tipi == bireysel)
                                 {
-                                    if( para <= 750) 
+                                    if( para <= 750)
                                     {
                                         ParaCek(mSirasi, hSirasi, para, temp);
                                         break;
@@ -265,15 +269,21 @@ int main()
                                     else
                                     {
                                         printf("\nGunuk para cekme limiti 750 TL dir \n");
-                                        printf("Yeniden miktar girmek ister misin? (istemiyorsaniz 0 girin)");
-                                        scanf("%d",&para);
+                                        printf("Yeniden miktar girin (istemiyorsaniz 0 girin) ");
+                                        scanf("%f",&para);
                                         if (para == 0) break;
-                                        
-                                    } 
+                                        else
+                                        {
+                                            ParaCek(mSirasi, hSirasi, para, temp);
+                                            break;
+                                        }
+
+
+                                    }
                                 }
-                                if ( musteriler[mSirasi].tipi == ticari)    
+                                if ( (mp+mSirasi)->tipi == ticari)
                                 {
-                                    if( para <= 1500) 
+                                    if( para <= 1500)
                                     {
                                         ParaCek(mSirasi, hSirasi, para, temp);
                                         break;
@@ -281,11 +291,16 @@ int main()
                                     else
                                     {
                                         printf("\nGunuk para cekme limiti 1500 TL dir\n");
-                                        printf("Yeniden miktar girmek ister misin? (istemiyorsaniz 0 girin)");
-                                        scanf("%d",&para);
+                                        printf("Yeniden miktar girin (istemiyorsaniz 0 girin) ");
+                                        scanf("%f",&para);
                                         if (para == 0) break;
-                                    } 
-                                }         
+                                        else
+                                        {
+                                            ParaCek(mSirasi, hSirasi, para, temp);
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                             break;
                         case 2:
@@ -298,7 +313,7 @@ int main()
 						    {
 							    for(i=0; i<8 ;i++)
 							    {
-								    if(tarih[i] < 48 || tarih[i] > 57)
+								    if(*(tp1 + i) < 48 || *(tp1 + i) > 57)
 								    {
 									    break;
 								    }
@@ -348,7 +363,7 @@ int main()
 						    {
 							    for(i=0; i<8 ;i++)
 							    {
-								    if(tarih[i] < 48 || tarih[i] > 57)
+								    if(*(tp1 + i) < 48 || *(tp1 + i) > 57)
 								    {
 									    break;
 								    }
@@ -381,7 +396,7 @@ int main()
 						    {
 							    for(i=0; i<8 ;i++)
 							    {
-								    if(tarih[i] < 48 || tarih[i] > 57)
+								    if(*(tp1 + i) < 48 || *(tp1 + i) > 57)
 								    {
 									    break;
 								    }
@@ -407,7 +422,7 @@ int main()
 						    {
 							    for(i=0; i<8 ;i++)
 							    {
-								    if(tarih2[i] < 48 || tarih2[i] > 57)
+								    if(*(tp2 + i) < 48 || *(tp2 + i) > 57)
 								    {
 									    break;
 								    }
@@ -430,7 +445,7 @@ int main()
                             break;
 
                         case 0:
-                            exit(0);
+                            return 0;;
                             break;
                         default:
                             printf("Hatali secim Yaptiniz!!!\n");
@@ -439,7 +454,7 @@ int main()
                     }
                     break;
                 case 0:
-                    exit(0);
+                    return 0;;
                     break;
                 default:
                     printf("Hatali secim Yaptiniz!!!\n");
@@ -452,7 +467,7 @@ int main()
             BankaRaporuAl();
             break;
         case 0:
-            exit(0);
+            return 0;;
             break;
         default:
             printf("Hatali secim Yaptiniz!!!\n");
@@ -467,7 +482,7 @@ void ProgramAcilis()
 	fp = fopen("bireysel.txt","r");
 	if(fp != NULL)
 	{
-		while(fread(&musteriler[musteriSayisi], sizeof(Musteri), 1, fp))
+		while(fread((mp+musteriSayisi), sizeof(Musteri), 1, fp))
 		{
 			musteriSayisi++;
 		}
@@ -477,7 +492,7 @@ void ProgramAcilis()
     fp = fopen("ticari.txt","r");
     if(fp != NULL)
     {
-    	while(fread(&musteriler[musteriSayisi], sizeof(Musteri), 1, fp))
+    	while(fread((mp+musteriSayisi), sizeof(Musteri), 1, fp))
     	{
     		musteriSayisi++;
     	}
@@ -491,65 +506,71 @@ void MusteriEkle()
 	printf("\n----------------MUSTERI  EKLEME----------------\n");
 	fflush(stdin);
 	printf("Isminizi giriniz:");
-	scanf("%s",musteriler[musteriSayisi].adi);
-    //gets(musteriler[musteriSayisi].adi);
+	scanf("%s",(mp+musteriSayisi)->adi);
+    //gets((mp+musteriSayisi)->adi);
 	fflush(stdin);
 	printf("Musteri tipini giriniz (bireysel->0 -- ticari->1):");
-	scanf("%d",&musteriler[musteriSayisi].tipi);
+	scanf("%d",&(mp+musteriSayisi)->tipi);
 
 	srand(time(NULL));
 	temp=rand()%1000;
 	printf(" %d uretilen\n",temp);
 	for(i=0; i<musteriSayisi; i++)
 	{
-		if(temp == musteriler[i].numarasi)
+		if(temp == (mp+i)->numarasi)
 		{
 			temp=rand()%1000;
 			printf("Ayni hesap no bulundu tekrar hesap no uretiliyor %d yeni uretilen",temp);
 			i=0;
 		}
 	}
-	musteriler[musteriSayisi].numarasi = temp;
-	musteriler[musteriSayisi].hesapSayisi=0;
-	if(musteriler[musteriSayisi].tipi==bireysel)
+	(mp+musteriSayisi)->numarasi = temp;
+	(mp+musteriSayisi)->hesapSayisi=0;
+	if((mp+musteriSayisi)->tipi==bireysel)
 	{
 		fp= fopen("bireysel.txt","a");
-		fwrite(&musteriler[musteriSayisi], sizeof(Musteri), 1, fp);
+		fwrite((mp+musteriSayisi), sizeof(Musteri), 1, fp);
 		fclose(fp);
 	}
 	else
 	{
 		fp= fopen("ticari.txt","a");
-		fwrite(&musteriler[musteriSayisi], sizeof(Musteri), 1, fp);
+		fwrite((mp+musteriSayisi), sizeof(Musteri), 1, fp);
 		fclose(fp);
 	}
 	musteriSayisi++;
 	fflush(stdin);
-	printf("Bankmiza HOS GELDINIZ\nMUSTERI NUMARANIZ %d \nLuten musteri numranizi saklayiniz.\n",musteriler[musteriSayisi-1].numarasi);
+	printf("Bankmiza HOS GELDINIZ\nMUSTERI NUMARANIZ %d \nLuten musteri numranizi saklayiniz.\n",(mp+musteriSayisi-1)->numarasi);
 }
 
-void MusteriListele()
+int MusteriListele()
 {
+    if( musteriSayisi == 0)
+    {
+        printf("\nHic Musteri Kaydi Bulunamadi!!!\n\n");
+        return 0;
+    }
     printf("\n----------Musteri Listesi----------\n");
     for (i = 0; i < musteriSayisi; i++)
     {
-        if (musteriler[i].tipi == bireysel)
+        if ((mp+i)->tipi == bireysel)
         {
             printf("%d - %s - bireysel\n",
-            musteriler[i].numarasi, musteriler[i].adi);
+            (mp+i)->numarasi, (mp+i)->adi);
         }
         else
         {
             printf("%d - %s - ticari\n",
-            musteriler[i].numarasi, musteriler[i].adi);
+            (mp+i)->numarasi, (mp+i)->adi);
         }
     }
+    return 1;
 }
 int MusteriIndisBul(int musteriNo)
 {
     for (i = 0; i < musteriSayisi; i++)
     {
-        if(musteriler[i].numarasi == musteriNo)
+        if((mp+i)->numarasi == musteriNo)
         {
             return i;
         }
@@ -564,13 +585,13 @@ void MusteriSil(int mSirasi)
     {
         if (musteriSayisi<999)
         {
-            musteriler[i]=musteriler[i+1];
+            *(mp+i)=*(mp+i+1);
         }
         else
         {
-            strcpy(musteriler[i].adi,"-1");
-            musteriler[i].hesapSayisi-1;
-            musteriler[i].numarasi=-1;
+            strcpy((mp+i)->adi,"-1");
+            (mp+i)->hesapSayisi-1;
+            (mp+i)->numarasi=-1;
         }
     }
     musteriSayisi--;
@@ -580,7 +601,7 @@ void MusteriSil(int mSirasi)
 
 void HesapAc(int mSirasi)
 {
-    if(musteriler[mSirasi].hesapSayisi==10)
+    if((mp+mSirasi)->hesapSayisi==10)
 	{
 		printf("\nToptam 10 adet hesabiniz bulunmaktadir. Daha fazla Hesap acamazsiniz.");
 
@@ -590,9 +611,9 @@ void HesapAc(int mSirasi)
         temp=rand()%10000;
 	    for(i=0; i<musteriSayisi; i++)
 	    {
-		    for(j=0;j<musteriler[i].hesapSayisi; j++)
+		    for(j=0;j<(mp+i)->hesapSayisi; j++)
 		    {
-			    if(musteriler[i].hesap[j].numarasi == temp)
+			    if((mp+i)->hesap[j].numarasi == temp)
 			    {
 				    temp=rand()%10000;
 				    i=0;
@@ -600,30 +621,37 @@ void HesapAc(int mSirasi)
 			    }
 		    }
 	    }
-        musteriler[mSirasi].hesap[musteriler[mSirasi].hesapSayisi].numarasi = temp;
-	    musteriler[mSirasi].hesap[musteriler[mSirasi].hesapSayisi].bakiye=0.0;
-	    musteriler[mSirasi].hesapSayisi++;
+        (mp+mSirasi)->hesap[(mp+mSirasi)->hesapSayisi].numarasi = temp;
+	    (mp+mSirasi)->hesap[(mp+mSirasi)->hesapSayisi].bakiye=0.0;
+	    (mp+mSirasi)->hesapSayisi++;
         structDosyaYaz();
         printf("\nSayin %s . Hesabiniz acilmistir. Yeni Hesap Numaraniz %d \nHesap bakiyeniz 0.0 TL'dir. \nLutfen hesap numaranizi kaybetmeyin!!!\n"
-		,musteriler[mSirasi].adi, musteriler[mSirasi].hesap[musteriler[mSirasi].hesapSayisi-1].numarasi);
+		,(mp+mSirasi)->adi, (mp+mSirasi)->hesap[(mp+mSirasi)->hesapSayisi-1].numarasi);
     }
 }
 
-void HesapListele(int mSirasi)
+int HesapListele(int mSirasi)
 {
     printf("\n----------Hesap Listesi----------\n");
-    for (i = 0; i < musteriler[mSirasi].hesapSayisi; i++)
+    if( (mp+mSirasi)->hesapSayisi == 0)
+    {
+        printf("\nHic Hesap Kaydi Bulunamadi!!!\n\n");
+        return 0;
+    }
+    for (i = 0; i < (mp+mSirasi)->hesapSayisi; i++)
     {
         printf("Hesap no: %d -> %.2f\n"
-        ,musteriler[mSirasi].hesap[i].numarasi, musteriler[mSirasi].hesap[i].bakiye);
+        ,(mp+mSirasi)->hesap[i].numarasi, (mp+mSirasi)->hesap[i].bakiye);
     }
+    return 1;
+
 }
 
 int HesapIndisBul(int mSirasi, int hesapNo)
 {
-    for (i = 0; i < musteriler[mSirasi].hesapSayisi ; i++)
+    for (i = 0; i < (mp+mSirasi)->hesapSayisi ; i++)
     {
-        if(musteriler[mSirasi].hesap[i].numarasi == hesapNo)
+        if((mp+mSirasi)->hesap[i].numarasi == hesapNo)
         {
             return i;
         }
@@ -633,81 +661,101 @@ int HesapIndisBul(int mSirasi, int hesapNo)
 
 void HesapSil(int mSirasi, int hSirasi)
 {
-    for (i = hSirasi; i < musteriler[mSirasi].hesapSayisi; i++)
+    for (i = hSirasi; i < (mp+mSirasi)->hesapSayisi; i++)
     {
-        if (musteriler[mSirasi].hesapSayisi<9)
+        if ((mp+mSirasi)->hesapSayisi<9)
         {
-            musteriler[mSirasi].hesap[i]=musteriler[mSirasi].hesap[i+1];
+            (mp+mSirasi)->hesap[i]=(mp+mSirasi)->hesap[i+1];
         }
         else
         {
 
-            musteriler[mSirasi].hesap[i].numarasi=-1;
-            musteriler[mSirasi].hesap[i].bakiye=-1;
+            (mp+mSirasi)->hesap[i].numarasi=-1;
+            (mp+mSirasi)->hesap[i].bakiye=-1;
         }
     }
-    musteriler[mSirasi].hesapSayisi--;
+    (mp+mSirasi)->hesapSayisi--;
     structDosyaYaz();
     printf("Hesap Silme isleminiz gerceklesmisitir.\n");
 }
 
 void ParaYatir(int mSirasi,int hSirasi,float para)
 {
-    musteriler[mSirasi].hesap[hSirasi].bakiye+=para;
-    rapor.hesapNo=musteriler[mSirasi].hesap[hSirasi].numarasi;
+    (mp+mSirasi)->hesap[hSirasi].bakiye+=para;
+    rapor.hesapNo=(mp+mSirasi)->hesap[hSirasi].numarasi;
     rapor.tutar=para;
     rapor.gidenHesapNo=0;
     strcpy(rapor.islem,"Para Yatirma");
     structDosyaYaz();
     BankaRaporaYaz();
     printf("Para yatirma isleminiz gereceklesmistir. Yeni bakiyeniz %.2f \n"
-    , musteriler[mSirasi].hesap[hSirasi].bakiye);
+    , (mp+mSirasi)->hesap[hSirasi].bakiye);
 
 }
 
 void ParaCek(int mSirasi, int hSirasi,float para, int tarih)
 {
-    fp = fopen("rapor.txt","r");
-    while (fread(&rapor, sizeof(Rapor),1,fp))
+    char a;
+    float toplam=0.0;
+    temp3=0;
+
+    if ((mp+mSirasi)->hesap[hSirasi].bakiye < para)
     {
-        if(rapor.hesapNo == musteriler[mSirasi].hesap[hSirasi].numarasi && temp == rapor.tarih)
+
+        fflush(stdin);
+        printf("\nYetersiz Bakiye. Ek Hesaptan cekilsin mi?(e,h) ");
+        scanf("%c",&a);
+        temp3 = -1;
+    }
+    if (toupper(a) == 'E')
+    {
+        temp3=0;
+        fp = fopen("rapor.txt","r");
+        while (fread(&rapor, sizeof(Rapor),1,fp))
         {
-            if (strcmp(rapor.islem,"Para Cekme") == 0)
+            if(rapor.hesapNo == (mp+mSirasi)->hesap[hSirasi].numarasi && temp == rapor.tarih)
             {
-                if (musteriler[mSirasi].tipi == bireysel)
+                if (strcmp(rapor.islem,"Para Cekme") == 0)
                 {
-                    if (rapor.tutar+para > 750)
+                    toplam+=rapor.tutar;
+                    if ((mp+mSirasi)->tipi == bireysel)
                     {
-                        printf("\nGunluk para cekme limitini astiniz. \n");
-                        temp3=-1;
-                        break;
-                    }  
-                }
-                else
-                {
-                    if (rapor.tutar+para <= 1500)
+                        if (toplam+para > 750)
+                        {
+                            printf("\nGunluk para cekme limitini astiniz. %.2f \n",toplam+para);
+                            temp3=-1;
+                        }
+                    }
+                    else
                     {
-                        printf("\nGunluk para cekme limitini astiniz. \n");
-                        temp3=-1;
-                        break;
+                        if (toplam+para > 1500)
+                        {
+                            printf("\nGunluk para cekme limitini astiniz. %.2f \n",toplam+para);
+                            temp3=-1;
+                        }
                     }
                 }
             }
         }
+        fclose(fp);
     }
-    fclose(fp);
+    else
+    {
+        temp3=-1;
+    }
+    
     if(temp3 != -1)
     {
-        musteriler[mSirasi].hesap[hSirasi].bakiye-=para;
+        (mp+mSirasi)->hesap[hSirasi].bakiye-=para;
         rapor.tarih=tarih;
-        rapor.hesapNo=musteriler[mSirasi].hesap[hSirasi].numarasi;
+        rapor.hesapNo=(mp+mSirasi)->hesap[hSirasi].numarasi;
         strcpy(rapor.islem,"Para Cekme");
         rapor.gidenHesapNo=0;
         rapor.tutar=para;
         BankaRaporaYaz();
         structDosyaYaz();
-        printf("Para Cekme isleminiz gereceklesmistir. Yeni bakiyeniz %.2f \n"
-        , musteriler[mSirasi].hesap[hSirasi].bakiye);
+        printf("\nPara Cekme isleminiz gereceklesmistir. Yeni bakiyeniz %.2f \n"
+        , (mp+mSirasi)->hesap[hSirasi].bakiye);
     }
 }
 
@@ -716,9 +764,9 @@ void TumunuListele()
     printf("\n----------Tum Musteriler ve Hesap Listesi----------\n");
     for(i=0; i < musteriSayisi; i++)
 	{
-		for ( j = 0; j < musteriler[i].hesapSayisi; j++)
+		for ( j = 0; j < (mp+i)->hesapSayisi; j++)
         {
-            printf("Hesap Sahibi %s Hesap No %d\n",musteriler[i].adi, musteriler[i].hesap[j].numarasi);
+            printf("Hesap Sahibi %s Hesap No %d\n",(mp+i)->adi, (mp+i)->hesap[j].numarasi);
         }
 	}
 }
@@ -730,9 +778,9 @@ int *HavaleHesapIndisBul(int hesapNo)
     int gecici=-1;
     for (i = 0; i < musteriSayisi; i++)
     {
-        for( j = 0; j < musteriler[i].hesapSayisi ; j++)
+        for( j = 0; j < (mp+i)->hesapSayisi ; j++)
         {
-            if ( musteriler[i].hesap[j].numarasi == hesapNo)
+            if ( (mp+i)->hesap[j].numarasi == hesapNo)
             {
                 indisler[0]=i;
                 indisler[1]=j;
@@ -746,20 +794,21 @@ int *HavaleHesapIndisBul(int hesapNo)
 }
 void Havale(int mSirasi, int hSirasi, int gmSirasi, int ghSirasi, float para)
 {
-    if( musteriler[mSirasi].hesap[hSirasi].bakiye >= para )
+    if( (mp+mSirasi)->hesap[hSirasi].bakiye >= para )
     {
-        musteriler[mSirasi].hesap[hSirasi].bakiye-=para;
-        rapor.hesapNo=musteriler[mSirasi].hesap[hSirasi].numarasi;
-        rapor.gidenHesapNo= musteriler[gmSirasi].hesap[ghSirasi].numarasi;
+        (mp+mSirasi)->hesap[hSirasi].bakiye-=para;
+        rapor.hesapNo=(mp+mSirasi)->hesap[hSirasi].numarasi;
+        rapor.gidenHesapNo= (mp+gmSirasi)->hesap[ghSirasi].numarasi;
 
-        if (musteriler[mSirasi].tipi == bireysel)
+        if ((mp+mSirasi)->tipi == bireysel)
         {
-            musteriler[gmSirasi].hesap[ghSirasi].bakiye+=(para-(para*0.02));
+            (mp+gmSirasi)->hesap[ghSirasi].bakiye+=(para-(para*0.02));
+            rapor.tutar=(para-(para*0.02));
         }
-        
+
         else
         {
-            musteriler[gmSirasi].hesap[ghSirasi].bakiye+=para;
+            (mp+gmSirasi)->hesap[ghSirasi].bakiye+=para;
             rapor.tutar=para;
         }
 
@@ -768,13 +817,13 @@ void Havale(int mSirasi, int hSirasi, int gmSirasi, int ghSirasi, float para)
         BankaRaporaYaz();
         printf("\nHavale isleminiz basariyla gerceklesmistir.\n");
         printf("%s kisinin %d nolu hesabinda kalan bakiye %.2f\n"
-        ,musteriler[mSirasi].adi, musteriler[mSirasi].hesap[hSirasi].numarasi,musteriler[mSirasi].hesap[hSirasi].bakiye);
+        ,(mp+mSirasi)->adi, (mp+mSirasi)->hesap[hSirasi].numarasi,(mp+mSirasi)->hesap[hSirasi].bakiye);
         printf("%s kisinin %d nolu hesabinda kalan bakiye %.2f\n"
-        ,musteriler[gmSirasi].adi, musteriler[gmSirasi].hesap[ghSirasi].numarasi,musteriler[gmSirasi].hesap[ghSirasi].bakiye);
+        ,(mp+gmSirasi)->adi, (mp+gmSirasi)->hesap[ghSirasi].numarasi,(mp+gmSirasi)->hesap[ghSirasi].bakiye);
     }
     else
     {
-        printf("\n!!Yetersiz Bakiyeden Dolayı isleminiz gerceklesememiztir!!!\n");
+        printf("\n!!Yetersiz Bakiyeden Dolayi isleminiz gerceklesememiztir!!!\n");
     }
 
 }
@@ -784,9 +833,9 @@ void BankaRaporuAl()
 	double toplam=0.0;
 	for(i=0;i<musteriSayisi;i++)
 	{
-		for( j = 0; j<musteriler[i].hesapSayisi; j++ )
+		for( j = 0; j<(mp+i)->hesapSayisi; j++ )
 		{
-			toplam+=musteriler[i].hesap[j].bakiye;
+			toplam+=(mp+i)->hesap[j].bakiye;
 		}
 	}
 	fp= fopen("rapor.txt","r");
@@ -805,11 +854,12 @@ void HesapOzeti(int temp, int temp2 ,int mSirasi ,int hSirasi)
     fp = fopen("rapor.txt","r");
     fp2 = fopen("dekont.txt","w");
     fprintf(fp2,"-----------------------------DEKONT---------------------------\n");
-
     fprintf(fp2,"  TARIH       ISLEM       HESAP NO    GIDEN HESAP NO       TUTARI\n");
+    printf("\n-----------------------------DEKONT---------------------------\n");
+    printf("  TARIH       ISLEM       HESAP NO    GIDEN HESAP NO       TUTARI\n");
     while (fread(&rapor, sizeof(Rapor),1,fp))
     {
-        if(rapor.hesapNo == musteriler[mSirasi].hesap[hSirasi].numarasi || rapor.gidenHesapNo == musteriler[mSirasi].hesap[hSirasi].numarasi)
+        if(rapor.hesapNo == (mp+mSirasi)->hesap[hSirasi].numarasi || rapor.gidenHesapNo == (mp+mSirasi)->hesap[hSirasi].numarasi)
         {
             if(rapor.tarih >= temp && rapor.tarih <= temp2)
             {
@@ -837,13 +887,13 @@ structDosyaYaz(){
 	fp2 = fopen("ticari.txt","w");
 	for(i=0;i<musteriSayisi;i++)
 	{
-		if(musteriler[i].tipi == bireysel)
+		if((mp+i)->tipi == bireysel)
 		{
-			fwrite(&musteriler[i], sizeof(Musteri),1,fp);
+			fwrite((mp+i), sizeof(Musteri),1,fp);
 		}
 		else
 		{
-			fwrite(&musteriler[i], sizeof(Musteri),1,fp2);
+			fwrite((mp+i), sizeof(Musteri),1,fp2);
 		}
 	}
 	fclose(fp);
