@@ -695,7 +695,8 @@ void ParaYatir(int mSirasi,int hSirasi,float para)
 
 void ParaCek(int mSirasi, int hSirasi,float para, int tarih)
 {
-    char a;
+    char a='E';
+    
     float toplam=0.0;
     temp3=0;
 
