@@ -18,25 +18,19 @@ int *HavaleHesapIndisBul(int hesapNo);
 void Havale(int mSirasi, int hSirasi, int gmSirasi, int ghSirasi, float para);
 void BankaRaporuAl();
 void HesapOzeti(int temp, int temp2 ,int mSirasi ,int hSirasi);
-
-
-
 void BankaRaporaYaz();
 void structDosyaYaz();
-
 
 enum MusteriTipi
 {
 	bireysel = 0,
 	ticari = 1
 };
-
 typedef struct
 {
 	int numarasi;
 	float bakiye;
 }Hesap;
-
 typedef struct
 {
 	char adi[30];
@@ -44,9 +38,7 @@ typedef struct
 	enum MusteriTipi tipi;
 	int hesapSayisi;
 	Hesap hesap[10];
-
 }Musteri;
-
 
 typedef struct
 {
@@ -55,7 +47,6 @@ typedef struct
 	int gidenHesapNo;
 	char islem[20];
 	float tutar;
-
 }Rapor;
 
 Rapor rapor;
@@ -294,8 +285,7 @@ int main()
                                         scanf("%d",&para);
                                         if (para == 0) break;
                                     } 
-                                }
-                                
+                                }         
                             }
                             break;
                         case 2:
@@ -339,7 +329,6 @@ int main()
 	                        int *p;
                             while(1)
                             {
-
                                 p=HavaleHesapIndisBul(temp);
                                 if(*p == -1)
                                 {
@@ -720,8 +709,6 @@ void ParaCek(int mSirasi, int hSirasi,float para, int tarih)
         printf("Para Cekme isleminiz gereceklesmistir. Yeni bakiyeniz %.2f \n"
         , musteriler[mSirasi].hesap[hSirasi].bakiye);
     }
-    
-
 }
 
 void TumunuListele()
@@ -772,16 +759,10 @@ void Havale(int mSirasi, int hSirasi, int gmSirasi, int ghSirasi, float para)
         
         else
         {
-            
             musteriler[gmSirasi].hesap[ghSirasi].bakiye+=para;
             rapor.tutar=para;
         }
-        
 
-
-
-        
-        
         strcpy(rapor.islem,"Havale");
         structDosyaYaz();
         BankaRaporaYaz();
