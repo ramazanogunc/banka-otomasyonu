@@ -57,7 +57,7 @@ float para;
 char sayiKontrol, tarih[8], tarih2[8] ,*tp1 = tarih, *tp2 = tarih2;
 int i, j, secim, mSirasi, hSirasi, temp, temp2, temp3, musteriSayisi=0, raporSayisi=0;
 int main()
-{
+{    
     ProgramAcilis();
     while(1)
     {
@@ -711,7 +711,7 @@ void ParaCek(int mSirasi, int hSirasi,float para, int tarih)
     if (toupper(a) == 'E')
     {
         temp3=0;
-        fp = fopen("rapor.txt","r");
+        fp = fopen("log.txt","r");
         while (fread(&rapor, sizeof(Rapor),1,fp))
         {
             if(rapor.hesapNo == (mp+mSirasi)->hesap[hSirasi].numarasi && temp == rapor.tarih)
@@ -831,7 +831,7 @@ void Havale(int mSirasi, int hSirasi, int gmSirasi, int ghSirasi, float para)
 
 void BankaRaporuAl()
 {
-	double toplam=0.0;
+	double toplam=0.0 , gelen=0.0, giden=0.0;;
 	for(i=0;i<musteriSayisi;i++)
 	{
 		for( j = 0; j<(mp+i)->hesapSayisi; j++ )
@@ -839,20 +839,37 @@ void BankaRaporuAl()
 			toplam+=(mp+i)->hesap[j].bakiye;
 		}
 	}
-	fp= fopen("rapor.txt","r");
+	fp= fopen("log.txt","r");
 	printf("  TARIH       ISLEM       HESAP NO    GIDEN HESAP NO       TUTARI\n");
 	while(fread(&rapor,sizeof(Rapor),1,fp)==1)
 	{
+        if (strcmp(rapor.islem,"Para Cekme") == 0)
+        {
+            giden+=rapor.tutar;
+        }
+        if (strcmp(rapor.islem,"Para Yatirma") == 0)
+        {
+            gelen+=rapor.tutar;
+        }
+
 		printf("%8d%15s     %4d        %4d               %.2f\n"
 			,rapor.tarih, rapor.islem, rapor.hesapNo, rapor.gidenHesapNo, rapor.tutar);
 	}
-	printf("------------------------------------------\nBankada bulunana toplam para miktari %.2lf\n\n",toplam);
 
-	fclose(fp);
+    fclose(fp);
+	printf("------------------------------------------\nBankada bulunana toplam para miktari %.2lf\n",toplam);
+	printf("Bankadan giden para miktari %.2lf\n", giden);
+	printf("Bankaya gelen para miktari %.2lf\n\n", gelen);
+    fclose(fp);
+    fp2 = fopen("rapor.txt","w"); 
+    fprintf(fp2,"-------------------BANKA RAPORU-----------------------\nBankada bulunana toplam para miktari %.2lf\n",toplam);
+	fprintf(fp2,"Bankadan giden para miktari %.2lf\n", giden);
+	fprintf(fp2,"Bankaya gelen para miktari %.2lf\n\n", gelen);
+	fclose(fp2);
 }
 void HesapOzeti(int temp, int temp2 ,int mSirasi ,int hSirasi)
 {
-    fp = fopen("rapor.txt","r");
+    fp = fopen("log.txt","r");
     fp2 = fopen("dekont.txt","w");
     fprintf(fp2,"-----------------------------DEKONT---------------------------\n");
     fprintf(fp2,"  TARIH       ISLEM       HESAP NO    GIDEN HESAP NO       TUTARI\n");
@@ -879,7 +896,7 @@ void HesapOzeti(int temp, int temp2 ,int mSirasi ,int hSirasi)
 
 void BankaRaporaYaz()
 {
-	fp=fopen("rapor.txt","a");
+	fp=fopen("log.txt","a");
 	fwrite(&rapor,sizeof(Rapor),1,fp);
 	fclose(fp);
 }
