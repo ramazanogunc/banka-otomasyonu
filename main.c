@@ -762,10 +762,26 @@ void Havale(int mSirasi, int hSirasi, int gmSirasi, int ghSirasi, float para)
     if( musteriler[mSirasi].hesap[hSirasi].bakiye >= para )
     {
         musteriler[mSirasi].hesap[hSirasi].bakiye-=para;
-        musteriler[gmSirasi].hesap[ghSirasi].bakiye+=para;
         rapor.hesapNo=musteriler[mSirasi].hesap[hSirasi].numarasi;
         rapor.gidenHesapNo= musteriler[gmSirasi].hesap[ghSirasi].numarasi;
-        rapor.tutar=para;
+
+        if (musteriler[mSirasi].tipi == bireysel)
+        {
+            musteriler[gmSirasi].hesap[ghSirasi].bakiye+=(para-(para*0.02));
+        }
+        
+        else
+        {
+            
+            musteriler[gmSirasi].hesap[ghSirasi].bakiye+=para;
+            rapor.tutar=para;
+        }
+        
+
+
+
+        
+        
         strcpy(rapor.islem,"Havale");
         structDosyaYaz();
         BankaRaporaYaz();
