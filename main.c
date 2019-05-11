@@ -14,6 +14,8 @@ void ParaYatir(int mSirasi, int hSirasi,float para);
 void TumunuListele();
 int *HavaleHesapIndisBul(int hesapNo);
 void Havale(int mSirasi, int hSirasi, int gmSirasi, int ghSirasi, float para);
+void BankaRaporuAl();
+void HesapOzeti(int temp, int temp2 ,int mSirasi ,int hSirasi);
 
 
 
@@ -59,7 +61,7 @@ Musteri musteriler[1000],okunan;
 FILE *fp, *fp2;
 
 float para;
-char sayiKontrol, tarih[8];
+char sayiKontrol, tarih[8], tarih2[8];
 int i, j, secim, mSirasi, hSirasi, temp, temp2, temp3, musteriSayisi=0, raporSayisi=0;
 int main()
 {
@@ -228,10 +230,13 @@ int main()
                         switch ( secim )
                         {
                         case 1:
+                            printf("\n--------------------PARA CEKME--------------------\n");
+
                             //para cekme islemlerii
 
                             break;
                         case 2:
+                            printf("\n--------------------PARA YATIRMA--------------------\n");
                             fflush(stdin);
 						    printf("Yatirma tarhini giriniz(01012000 - formatinda giriniz): ");
     					    //scanf("%d",&rapor.tarih);
@@ -259,11 +264,12 @@ int main()
 							    }
 						    }
 
-                            printf("Yatiracaginiz miktari giriniz");
+                            printf("Yatiracaginiz miktari giriniz : ");
 						    scanf("%f",&para);
                             ParaYatir(mSirasi,hSirasi,para);
                             break;
                         case 3:
+                            printf("\n--------------------HAVALE--------------------\n");
                             TumunuListele();
                             printf("\nPara Gondereceginiz Hesap numarasini giriniz:");
 	                        scanf("%d",&temp);
@@ -312,10 +318,65 @@ int main()
                             printf("Gondereceginiz miktari giriniz");
 						    scanf("%f",&para);
                             Havale(mSirasi, hSirasi, temp2, temp3, para);
-                            //havale tarihi
-                            //havale tutar�
-                            //havale
                             break;
+                        case 4:
+                            printf("\n--------------------HESAP OZETI--------------------\n");
+                            fflush(stdin);
+						    printf("Baslangic tarhini giriniz(01012000 - formatinda giriniz): ");
+    					    //scanf("%d",&rapor.tarih);
+						    gets(tarih);
+                            while(1)
+						    {
+							    for(i=0; i<8 ;i++)
+							    {
+								    if(tarih[i] < 48 || tarih[i] > 57)
+								    {
+									    break;
+								    }
+							    }
+							    if(i==8)
+							    {
+								    temp = atoi(tarih);
+								    break;
+							    }
+							    else
+							    {
+								    printf("Girdiginiz deger tarih sayi degildir.\n");
+								    fflush(stdin);
+								    printf("Baslangic tarhini giriniz: ");
+								    gets(tarih);
+							    }
+						    }
+
+                            printf("Bitis tarhini giriniz(01012000 - formatinda giriniz): ");
+    					    //scanf("%d",&rapor.tarih);
+						    gets(tarih2);
+                            while(1)
+						    {
+							    for(i=0; i<8 ;i++)
+							    {
+								    if(tarih2[i] < 48 || tarih2[i] > 57)
+								    {
+									    break;
+								    }
+							    }
+							    if(i==8)
+							    {
+								    temp2 = atoi(tarih2);
+								    break;
+							    }
+							    else
+							    {
+								    printf("Girdiginiz deger tarih sayi degildir.\n");
+								    fflush(stdin);
+								    printf("Bitis tarhini giriniz: ");
+								    gets(tarih2);
+							    }
+						    }
+
+                            HesapOzeti(temp, temp2, mSirasi, hSirasi);
+                            break;
+
                         case 0:
                             exit(0);
                             break;
@@ -336,7 +397,7 @@ int main()
             break;
         case 4:
              printf("\n------------------------BANKA RAPORU------------------------\n");
-            //banka raporu alma fonksiyonu cag�rma
+            BankaRaporuAl();
             break;
         case 0:
             exit(0);
@@ -610,6 +671,50 @@ void Havale(int mSirasi, int hSirasi, int gmSirasi, int ghSirasi, float para)
 
 }
 
+void BankaRaporuAl()
+{
+	double toplam=0.0;
+	for(i=0;i<musteriSayisi;i++)
+	{
+		for( j = 0; j<musteriler[i].hesapSayisi; j++ )
+		{
+			toplam+=musteriler[i].hesap[j].bakiye;
+		}
+	}
+	fp= fopen("rapor.txt","r");
+	printf("  TARIH       ISLEM       HESAP NO    GIDEN HESAP NO       TUTARI\n");
+	while(fread(&rapor,sizeof(Rapor),1,fp)==1)
+	{
+		printf("%8d%15s     %4d        %4d               %.2f\n"
+			,rapor.tarih, rapor.islem, rapor.hesapNo, rapor.gidenHesapNo, rapor.tutar);
+	}
+	printf("------------------------------------------\nBankada bulunana toplam para miktari %.2lf\n\n",toplam);
+
+	fclose(fp);
+}
+void HesapOzeti(int temp, int temp2 ,int mSirasi ,int hSirasi)
+{
+    fp = fopen("rapor.txt","r");
+    fp2 = fopen("dekont.txt","w");
+    fprintf(fp2,"-----------------------------DEKONT---------------------------\n");
+
+    fprintf(fp2,"  TARIH       ISLEM       HESAP NO    GIDEN HESAP NO       TUTARI\n");
+    while (fread(&rapor, sizeof(Rapor),1,fp))
+    {
+        if(rapor.hesapNo == musteriler[mSirasi].hesap[hSirasi].numarasi || rapor.gidenHesapNo == musteriler[mSirasi].hesap[hSirasi].numarasi)
+        {
+            if(rapor.tarih >= temp && rapor.tarih <= temp2)
+            {
+                printf("%8d%15s     %4d        %4d               %.2f\n"
+			    ,rapor.tarih, rapor.islem, rapor.hesapNo, rapor.gidenHesapNo, rapor.tutar);
+                fprintf(fp2,"%8d%15s     %4d        %4d               %.2f\n"
+			    ,rapor.tarih, rapor.islem, rapor.hesapNo, rapor.gidenHesapNo, rapor.tutar);
+            }
+        }
+    }
+    fclose(fp);
+    fclose(fp2);
+}
 
 
 
