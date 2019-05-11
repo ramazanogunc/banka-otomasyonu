@@ -11,6 +11,7 @@ void HesapListele(int mSirasi);
 int HesapIndisBul(int mSirasi, int hesapNo);
 void HesapSil(int mSirasi, int hSirasi);
 void ParaYatir(int mSirasi, int hSirasi,float para);
+void ParaCek(int mSirasi, int hSirasi,float para, int tarih);
 void TumunuListele();
 int *HavaleHesapIndisBul(int hesapNo);
 void Havale(int mSirasi, int hSirasi, int gmSirasi, int ghSirasi, float para);
@@ -231,9 +232,70 @@ int main()
                         {
                         case 1:
                             printf("\n--------------------PARA CEKME--------------------\n");
+                            fflush(stdin);
+						    printf("Cekme tarhini giriniz(01012000 - formatinda giriniz): ");
+    					    //scanf("%d",&rapor.tarih);
+						    gets(tarih);
+                            while(1)
+						    {
+							    for(i=0; i<8 ;i++)
+							    {
+								    if(tarih[i] < 48 || tarih[i] > 57)
+								    {
+									    break;
+								    }
+							    }
+							    if(i==8)
+							    {
+								    temp = atoi(tarih);
+								    break;
+							    }
+							    else
+							    {
+								    printf("Girdiginiz deger tarih sayi degildir.\n");
+								    fflush(stdin);
+								    printf("Cekme tarhini giriniz: ");
+								    gets(tarih);
+							    }
+						    }
 
-                            //para cekme islemlerii
-
+                            while (1)
+                            {
+                            printf("Cekeceginiz miktari giriniz : ");
+						    scanf("%f",&para);
+                                if ( musteriler[mSirasi].tipi == bireysel)    
+                                {
+                                    if( para <= 750) 
+                                    {
+                                        ParaCek(mSirasi, hSirasi, para, temp);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        printf("\nGunuk para cekme limiti 750 TL dir \n");
+                                        printf("Yeniden miktar girmek ister misin? (istemiyorsaniz 0 girin)");
+                                        scanf("%d",&para);
+                                        if (para == 0) break;
+                                        
+                                    } 
+                                }
+                                if ( musteriler[mSirasi].tipi == ticari)    
+                                {
+                                    if( para <= 1500) 
+                                    {
+                                        ParaCek(mSirasi, hSirasi, para, temp);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        printf("\nGunuk para cekme limiti 1500 TL dir\n");
+                                        printf("Yeniden miktar girmek ister misin? (istemiyorsaniz 0 girin)");
+                                        scanf("%d",&para);
+                                        if (para == 0) break;
+                                    } 
+                                }
+                                
+                            }
                             break;
                         case 2:
                             printf("\n--------------------PARA YATIRMA--------------------\n");
@@ -610,6 +672,54 @@ void ParaYatir(int mSirasi,int hSirasi,float para)
     BankaRaporaYaz();
     printf("Para yatirma isleminiz gereceklesmistir. Yeni bakiyeniz %.2f \n"
     , musteriler[mSirasi].hesap[hSirasi].bakiye);
+
+}
+
+void ParaCek(int mSirasi, int hSirasi,float para, int tarih)
+{
+    fp = fopen("rapor.txt","r");
+    while (fread(&rapor, sizeof(Rapor),1,fp))
+    {
+        if(rapor.hesapNo == musteriler[mSirasi].hesap[hSirasi].numarasi && temp == rapor.tarih)
+        {
+            if (strcmp(rapor.islem,"Para Cekme") == 0)
+            {
+                if (musteriler[mSirasi].tipi == bireysel)
+                {
+                    if (rapor.tutar+para > 750)
+                    {
+                        printf("\nGunluk para cekme limitini astiniz. \n");
+                        temp3=-1;
+                        break;
+                    }  
+                }
+                else
+                {
+                    if (rapor.tutar+para <= 1500)
+                    {
+                        printf("\nGunluk para cekme limitini astiniz. \n");
+                        temp3=-1;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    fclose(fp);
+    if(temp3 != -1)
+    {
+        musteriler[mSirasi].hesap[hSirasi].bakiye-=para;
+        rapor.tarih=tarih;
+        rapor.hesapNo=musteriler[mSirasi].hesap[hSirasi].numarasi;
+        strcpy(rapor.islem,"Para Cekme");
+        rapor.gidenHesapNo=0;
+        rapor.tutar=para;
+        BankaRaporaYaz();
+        structDosyaYaz();
+        printf("Para Cekme isleminiz gereceklesmistir. Yeni bakiyeniz %.2f \n"
+        , musteriler[mSirasi].hesap[hSirasi].bakiye);
+    }
+    
 
 }
 
